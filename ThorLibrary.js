@@ -1,6 +1,7 @@
 export function Thor({id}) {
 	const appInitialPoint = document.getElementById(id);
 	let parentElements = null;
+	let componentsID = 0;
 
 	function state({
 		value,
@@ -12,10 +13,16 @@ export function Thor({id}) {
 				return stateValue
 			},
 			(newValue) => {
-				if (stateValue !== newValue) {
-					rerenderDOM()
-					stateValue = newValue
-				}
+
+				console.group('state')
+				console.log('start rerender')
+				console.log('stateValue', stateValue)
+				console.log('newValue', newValue)
+				console.groupEnd()
+				stateValue = newValue
+				//
+				renderDOM()
+
 				if (callback) {
 					callback()
 				}
@@ -32,20 +39,18 @@ export function Thor({id}) {
 			atrList: params.atrList || {},
 			eventList: params.eventList || [],
 		}
-		return {
-			render: () => {
-				return componentParams
-			}
-		}
+		return componentParams;
 	}
 
 	function component({
+		name,
 		state,
 		parent,
 		children
 	}) {
 		return {
-			state: state,
+			UID: componentsID++,
+			name: name,
 			parent: () => {
 				return parent
 			},
@@ -55,8 +60,23 @@ export function Thor({id}) {
 		}
 	}
 
-	function renderComponent(component) {
-		console.log('start render')
+	function renderComponent({
+		tags,
+		key
+	}) {
+		const element = document.createElement(tags.tag)
+		element.setAttribute('key', "elemenThor-" + key)
+		//
+		element.innerText = tags.text
+		//
+		tags.eventList.forEach((el) => {
+			element.addEventListener('click', () => {
+					Object.values(el)[0]()
+				}
+			)
+		})
+		//
+		return element
 	}
 
 	function parent(parent) {
@@ -64,9 +84,29 @@ export function Thor({id}) {
 		return parent
 	}
 
-	function rerenderDOM() {
-		console.log(parentElements)
-		console.log('rerender')
+
+	function renderDOM() {
+		console.log('render')
+		//
+		let entryElement = appInitialPoint.cloneNode(true)
+
+
+		//
+		function recursion(data, toAppend) {
+			const parentElement = renderComponent({tags: data.parent()})
+			toAppend.appendChild(parentElement)
+			data?.children()?.forEach((el) => {
+				recursion(el, parentElement)
+			})
+		}
+
+		//
+		recursion(parentElements, entryElement)
+		appInitialPoint.innerHTML = ''
+		//
+		entryElement.childNodes.forEach((el) => {
+			appInitialPoint.appendChild(el)
+		})
 	}
 
 
@@ -74,7 +114,7 @@ export function Thor({id}) {
 		state,
 		parent,
 		element,
-		rerenderDOM,
+		renderDOM,
 		component
 
 	}
