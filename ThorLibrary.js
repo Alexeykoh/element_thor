@@ -1,24 +1,19 @@
 export function Thor({id}) {
-	const appInitialPoint = document.getElementById(id);
+	let appInitialPoint = document.getElementById(id);
 	let parentElements = null;
 	let componentsID = 0;
+	let eventOrder = []
 
 	function state({
 		value,
 		callback
 	}) {
-		let stateValue = value || null
+		let stateValue = value
 		return [
 			() => {
 				return stateValue
 			},
 			(newValue) => {
-
-				console.group('state')
-				console.log('start rerender')
-				console.log('stateValue', stateValue)
-				console.log('newValue', newValue)
-				console.groupEnd()
 				stateValue = newValue
 				//
 				renderDOM()
@@ -26,7 +21,7 @@ export function Thor({id}) {
 				if (callback) {
 					callback()
 				}
-				return stateValue
+				// return stateValue
 			}
 		]
 	}
@@ -60,20 +55,48 @@ export function Thor({id}) {
 		}
 	}
 
+	function setEvents() {
+		eventOrder.forEach(({
+			id,
+			event
+		}) => {
+			document.getElementById(`elemenThor-${id}`).addEventListener(event[0], function () {
+				event[1]()
+			})
+		})
+		eventOrder = []
+	}
+
 	function renderComponent({
 		tags,
 		key
 	}) {
 		const element = document.createElement(tags.tag)
-		element.setAttribute('key', "elemenThor-" + key)
+		element.setAttribute('id', "elemenThor-" + key)
 		//
-		element.innerText = tags.text
+
+		if (typeof tags.text === "string") {
+			element.innerText = tags.text
+		}
+		if (typeof tags.text === 'function') {
+			element.innerText = tags.text()
+		}
+		//
+		tags.classList.forEach((el) => {
+			if (typeof el === "string" && el !== '') {
+				element.classList.add(el.replace(/ /g, ''))
+			}
+			if (typeof el === "function" && el() !== '') {
+				let fnResult = el().toString().replace(/ /g, '')
+				element.classList.add(fnResult)
+			}
+		})
 		//
 		tags.eventList.forEach((el) => {
-			element.addEventListener('click', () => {
-					Object.values(el)[0]()
-				}
-			)
+			eventOrder.push({
+				id: key,
+				event: el
+			})
 		})
 		//
 		return element
@@ -86,14 +109,15 @@ export function Thor({id}) {
 
 
 	function renderDOM() {
-		console.log('render')
 		//
 		let entryElement = appInitialPoint.cloneNode(true)
 
-
 		//
 		function recursion(data, toAppend) {
-			const parentElement = renderComponent({tags: data.parent()})
+			const parentElement = renderComponent({
+				tags: data.parent(),
+				key: data.UID
+			})
 			toAppend.appendChild(parentElement)
 			data?.children()?.forEach((el) => {
 				recursion(el, parentElement)
@@ -102,20 +126,26 @@ export function Thor({id}) {
 
 		//
 		recursion(parentElements, entryElement)
-		appInitialPoint.innerHTML = ''
-		//
-		entryElement.childNodes.forEach((el) => {
-			appInitialPoint.appendChild(el)
-		})
-	}
+		const newDOM = entryElement.cloneNode(true)
+		const mainParent = document.getElementById(id).parentElement
+		const prevDOM = document.getElementById(id)
 
+		mainParent.replaceChild(
+			newDOM,
+			prevDOM
+		)
+
+		setTimeout(() => {
+			setEvents()
+		}, 50)
+
+	}
 
 	return {
 		state,
 		parent,
 		element,
 		renderDOM,
-		component
-
+		component,
 	}
 }
