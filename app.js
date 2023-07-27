@@ -29,7 +29,7 @@ thor.parent(
 								(() => {
 									return kek()
 								})()
-							]
+							],
 						}),
 						children: [
 							new thor.component({
@@ -52,17 +52,21 @@ thor.parent(
 						name: 'grandButton',
 						parent: new thor.element({
 							tag: 'button',
-							text: `click on me ${counter()}`,
+							text: `click on me`,
+							classList: [
+								'lel', 'w25', counter
+							],
 							eventList: [
-								{
-									click: () => {
-										setCounter(counter() + 1)
-										console.log(counter())
-									}
+								[
+									'click', () => {
+									console.log('click on button')
+									setCounter(counter() + 1)
+									// thor.renderDOM()
 								}
+								]
 							]
 						})
-					})
+					}),
 				]
 			})
 		]
@@ -70,3 +74,4 @@ thor.parent(
 )
 
 thor.renderDOM()
+
