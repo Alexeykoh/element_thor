@@ -1,22 +1,26 @@
-import {Thor} from "./ThorLibrary.js";
+import {Thor} from "./thorLibrary/ThorLibrary.js";
 
 // entry point
 const thor = new Thor({id: 'app'})
 
 
 // states
-const [kek, setKek] = thor.state({value: 'kek-class'})
-const [lol, setLol] = thor.state({value: 'lol'})
+const [counter, setCounter] = thor.state.set({value: 'empty value'})
 
-const [counter, setCounter] = thor.state({value: 1})
+const [color, setColor] = thor.state.set({value: false})
 
-const [color, setColor] = thor.state({value: false})
+console.log(counter())
+setCounter('hello world')
+console.log(counter())
+
+
+console.log(thor.state.getAll())
 
 function changeColor() {
 	setColor(!color())
 }
 
-function encreseCounter() {
+function addCounter() {
 	setCounter(counter() + 1)
 }
 
@@ -78,11 +82,13 @@ thor.parent(
 								}
 							],
 							eventList: [
-								[
-									'click', () => {
-									changeColor();
-									}
-								],
+								{
+									click: [
+										changeColor, addCounter, () => {
+											console.log('click')
+										}
+									]
+								}
 							]
 						})
 					}),
@@ -94,3 +100,4 @@ thor.parent(
 
 // render
 thor.renderDOM()
+thor.getState()
