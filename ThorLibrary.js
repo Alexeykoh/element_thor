@@ -8,7 +8,7 @@ export function Thor({id}) {
 		value,
 		callback
 	}) {
-		let stateValue = value || null
+		let stateValue = value
 		return [
 			() => {
 				return stateValue
@@ -67,7 +67,6 @@ export function Thor({id}) {
 		eventOrder = []
 	}
 
-
 	function renderComponent({
 		tags,
 		key
@@ -75,15 +74,20 @@ export function Thor({id}) {
 		const element = document.createElement(tags.tag)
 		element.setAttribute('id', "elemenThor-" + key)
 		//
-		element.innerText = tags.text
+
+		if (typeof tags.text === "string") {
+			element.innerText = tags.text
+		}
+		if (typeof tags.text === 'function') {
+			element.innerText = tags.text()
+		}
 		//
 		tags.classList.forEach((el) => {
-			if (typeof el === "string") {
-				element.classList.add(el)
+			if (typeof el === "string" && el !== '') {
+				element.classList.add(el.replace(/ /g, ''))
 			}
-			if (typeof el === "function") {
-				let fnResult = el().toString()
-				console.log('renderComponent', fnResult)
+			if (typeof el === "function" && el() !== '') {
+				let fnResult = el().toString().replace(/ /g, '')
 				element.classList.add(fnResult)
 			}
 		})
@@ -105,7 +109,6 @@ export function Thor({id}) {
 
 
 	function renderDOM() {
-		console.log('render')
 		//
 		let entryElement = appInitialPoint.cloneNode(true)
 
@@ -124,22 +127,17 @@ export function Thor({id}) {
 		//
 		recursion(parentElements, entryElement)
 		const newDOM = entryElement.cloneNode(true)
-		console.log(newDOM)
+		const mainParent = document.getElementById(id).parentElement
+		const prevDOM = document.getElementById(id)
 
-		console.log('appInitialPoint', appInitialPoint)
-		console.log('newDOM', newDOM)
-		console.log('appInitialPoint.parentElement', appInitialPoint.parentElement)
-
-
-		appInitialPoint.parentElement.replaceChild(
+		mainParent.replaceChild(
 			newDOM,
-			appInitialPoint
+			prevDOM
 		)
 
-		console.log('eventOrder', eventOrder)
 		setTimeout(() => {
 			setEvents()
-		}, 100)
+		}, 50)
 
 	}
 

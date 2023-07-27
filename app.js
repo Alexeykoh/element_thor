@@ -1,10 +1,26 @@
 import {Thor} from "./ThorLibrary.js";
 
+// entry point
 const thor = new Thor({id: 'app'})
+
+
+// states
 const [kek, setKek] = thor.state({value: 'kek-class'})
 const [lol, setLol] = thor.state({value: 'lol'})
+
 const [counter, setCounter] = thor.state({value: 1})
 
+const [color, setColor] = thor.state({value: false})
+
+function changeColor() {
+	setColor(!color())
+}
+
+function encreseCounter() {
+	setCounter(counter() + 1)
+}
+
+// DOM elements
 thor.parent(
 	new thor.component({
 		name: 'nav',
@@ -25,11 +41,6 @@ thor.parent(
 						parent: new thor.element({
 							tag: 'li',
 							text: 'li',
-							classList: [
-								(() => {
-									return kek()
-								})()
-							],
 						}),
 						children: [
 							new thor.component({
@@ -52,18 +63,26 @@ thor.parent(
 						name: 'grandButton',
 						parent: new thor.element({
 							tag: 'button',
-							text: `click on me`,
+							text: () => {
+								return 'lel ' + counter()
+							},
 							classList: [
-								'lel', 'w25', counter
+								'lel',
+								'w25',
+								() => {
+									if (color()) {
+										return 'red'
+									} else {
+										return ''
+									}
+								}
 							],
 							eventList: [
 								[
 									'click', () => {
-									console.log('click on button')
-									setCounter(counter() + 1)
-									// thor.renderDOM()
-								}
-								]
+									changeColor();
+									}
+								],
 							]
 						})
 					}),
@@ -73,5 +92,5 @@ thor.parent(
 	})
 )
 
+// render
 thor.renderDOM()
-
