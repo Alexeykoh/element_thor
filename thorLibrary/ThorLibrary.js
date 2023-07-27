@@ -1,29 +1,20 @@
+import {ThorState} from "./components/thorState.js";
+
 export function Thor({id}) {
 	let appInitialPoint = document.getElementById(id);
 	let parentElements = null;
 	let componentsID = 0;
 	let eventOrder = []
+	let stateList = []
 
-	function state({
-		value,
-		callback
-	}) {
-		let stateValue = value
-		return [
-			() => {
-				return stateValue
-			},
-			(newValue) => {
-				stateValue = newValue
-				//
-				renderDOM()
 
-				if (callback) {
-					callback()
-				}
-				// return stateValue
-			}
-		]
+	const state = {
+		set: (args) => {
+			return ThorState({...args}, stateList, renderDOM)
+		},
+		getAll: ()=>{
+			return stateList
+		}
 	}
 
 	function element(params) {
@@ -60,9 +51,13 @@ export function Thor({id}) {
 			id,
 			event
 		}) => {
-			document.getElementById(`elemenThor-${id}`).addEventListener(event[0], function () {
+			const element = document.getElementById(`elemenThor-${id}`)
+			const eventType = event[0]
+			const eventFn = function () {
 				event[1]()
-			})
+			}
+			//
+			element.addEventListener(eventType, eventFn, true)
 		})
 		eventOrder = []
 	}
@@ -92,12 +87,12 @@ export function Thor({id}) {
 			}
 		})
 		//
-		tags.eventList.forEach((el) => {
-			eventOrder.push({
-				id: key,
-				event: el
-			})
-		})
+		// tags.eventList.forEach((el) => {
+		// 	eventOrder.push({
+		// 		id: key,
+		// 		event: el
+		// 	})
+		// })
 		//
 		return element
 	}
@@ -138,7 +133,6 @@ export function Thor({id}) {
 		setTimeout(() => {
 			setEvents()
 		}, 50)
-
 	}
 
 	return {
