@@ -1,4 +1,8 @@
-import {ThorState} from "./components/thorState.js";
+import {clearState, ThorState} from "./components/thorState.js";
+import {elementDetermination} from "./components/determination/element-determination.js";
+import {componentDetermination} from "./components/determination/component-determination.js";
+import {renderComponent} from "./components/thorRenderElement.js";
+import {setEvents} from "./components/thorEventExecuter.js";
 
 export function Thor({id}) {
 	let appInitialPoint = document.getElementById(id);
@@ -12,89 +16,20 @@ export function Thor({id}) {
 		set: (args) => {
 			return ThorState({...args}, stateList, renderDOM)
 		},
-		getAll: ()=>{
+		getAll: () => {
 			return stateList
+		},
+		clearStorageState: () => {
+			return clearState()
 		}
 	}
 
-	function element(params) {
-		const componentParams = {
-			tag: params.tag || 'div',
-			text: params.text || '',
-			classList: params.classList || [],
-			atrList: params.atrList || {},
-			eventList: params.eventList || [],
-		}
-		return componentParams;
+	function element(args) {
+		return elementDetermination({...args})
 	}
 
-	function component({
-		name,
-		state,
-		parent,
-		children
-	}) {
-		return {
-			UID: componentsID++,
-			name: name,
-			parent: () => {
-				return parent
-			},
-			children: () => {
-				return children
-			}
-		}
-	}
-
-	function setEvents() {
-		eventOrder.forEach(({
-			id,
-			event
-		}) => {
-			const element = document.getElementById(`elemenThor-${id}`)
-			const eventType = event[0]
-			const eventFn = function () {
-				event[1]()
-			}
-			//
-			element.addEventListener(eventType, eventFn, true)
-		})
-		eventOrder = []
-	}
-
-	function renderComponent({
-		tags,
-		key
-	}) {
-		const element = document.createElement(tags.tag)
-		element.setAttribute('id', "elemenThor-" + key)
-		//
-
-		if (typeof tags.text === "string") {
-			element.innerText = tags.text
-		}
-		if (typeof tags.text === 'function') {
-			element.innerText = tags.text()
-		}
-		//
-		tags.classList.forEach((el) => {
-			if (typeof el === "string" && el !== '') {
-				element.classList.add(el.replace(/ /g, ''))
-			}
-			if (typeof el === "function" && el() !== '') {
-				let fnResult = el().toString().replace(/ /g, '')
-				element.classList.add(fnResult)
-			}
-		})
-		//
-		// tags.eventList.forEach((el) => {
-		// 	eventOrder.push({
-		// 		id: key,
-		// 		event: el
-		// 	})
-		// })
-		//
-		return element
+	function component(args) {
+		return componentDetermination({...args}, componentsID)
 	}
 
 	function parent(parent) {
@@ -111,7 +46,8 @@ export function Thor({id}) {
 		function recursion(data, toAppend) {
 			const parentElement = renderComponent({
 				tags: data.parent(),
-				key: data.UID
+				key: data.UID,
+				eventOrder: eventOrder
 			})
 			toAppend.appendChild(parentElement)
 			data?.children()?.forEach((el) => {
@@ -131,7 +67,13 @@ export function Thor({id}) {
 		)
 
 		setTimeout(() => {
-			setEvents()
+			setEvents({
+				renderDOM: renderDOM,
+				eventOrder: eventOrder
+			})
+				.then(() => {
+					eventOrder = []
+				})
 		}, 50)
 	}
 

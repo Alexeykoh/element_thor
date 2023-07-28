@@ -3,101 +3,81 @@ import {Thor} from "./thorLibrary/ThorLibrary.js";
 // entry point
 const thor = new Thor({id: 'app'})
 
+const solidList = {
+	value: [
+		{
+			id: 0,
+			text: 'hello leha'
+		},
+		{
+			id: 1,
+			text: 'hello ivan'
+		},
+	]
+}
 
 // states
-const [counter, setCounter] = thor.state.set({value: 'empty value'})
+const [todoList, setTodoList] = thor.state.set(solidList)
+const [inputValue, setInputValue] = thor.state.set('')
 
-const [color, setColor] = thor.state.set({value: false})
-
-console.log(counter())
-setCounter('hello world')
-console.log(counter())
-
-
-console.log(thor.state.getAll())
-
-function changeColor() {
-	setColor(!color())
-}
-
-function addCounter() {
-	setCounter(counter() + 1)
-}
 
 // DOM elements
 thor.parent(
 	new thor.component({
-		name: 'nav',
+		name: 'title',
 		parent: new thor.element({
-			tag: 'nav',
-			classList: ['nav', 'nav--main']
+			tag: 'h1',
+			text: 'elemenThor TODO'
 		}),
 		children: [
 			new thor.component({
 				name: 'ul',
 				parent: new thor.element({
 					tag: 'ul',
-					text: 'ul'
 				}),
-				children: [
-					new thor.component({
-						name: 'li',
-						parent: new thor.element({
-							tag: 'li',
-							text: 'li',
-						}),
-						children: [
-							new thor.component({
-								name: 'p1',
-								parent: new thor.element({
-									tag: 'p',
-									text: 'paragraph'
-								})
-							}),
-							new thor.component({
-								name: 'p2',
-								parent: new thor.element({
-									tag: 'p',
-									text: 'paragraph'
-								})
-							}),
-						]
-					}),
-					new thor.component({
-						name: 'grandButton',
-						parent: new thor.element({
-							tag: 'button',
-							text: () => {
-								return 'lel ' + counter()
-							},
-							classList: [
-								'lel',
-								'w25',
-								() => {
-									if (color()) {
-										return 'red'
-									} else {
-										return ''
-									}
-								}
-							],
-							eventList: [
-								{
-									click: [
-										changeColor, addCounter, () => {
-											console.log('click')
-										}
-									]
-								}
-							]
-						})
-					}),
-				]
-			})
+				children: todoItemList()
+			}),
+			new thor.component({
+				name: 'input',
+				parent: new thor.element({
+					tag: 'input',
+					atrList: [{placeholder: 'kek'}],
+					value: 'ertgsdgr',
+					eventList: [
+						{'change': [()=>{
+								console.log('on change')}]}
+					]
+				}),
+				children: []
+			}),
+			new thor.component({
+				name: 'sendButton',
+				parent: new thor.element({
+					tag: 'button',
+					text: 'add task'
+				}),
+				children: []
+			}),
 		]
 	})
 )
 
 // render
 thor.renderDOM()
-thor.getState()
+
+//
+function todoItemList() {
+	return todoList().map((el) => {
+		return (
+			new thor.component({
+				name: 'li',
+				parent: new thor.element({
+					tag: 'li',
+					text: el.text,
+				}),
+				children: []
+			})
+		)
+	})
+}
+
