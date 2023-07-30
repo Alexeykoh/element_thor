@@ -38,7 +38,16 @@ export function renderComponent({
 		)
 	})
 	//
-	element.value = tags.value
+	setValue({element:element,tags:tags})
 	//
 	return element
+}
+
+function setValue ({element,tags}){
+	if (typeof tags.value === "string" && tags.value !== '') {
+		element.value = tags.value
+	}
+	if (typeof tags.value === "function" && tags.value !== '') {
+		element.value = tags.value()
+	}
 }

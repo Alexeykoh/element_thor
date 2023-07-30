@@ -14,16 +14,24 @@ export async function setEvents({
 		const eventType = Object.keys(event).toString()
 		const eventFn = Object.values(event)[0]
 		//
-		element.addEventListener(eventType, () => {
-			executeEventFunctions(eventFn, renderDOM)
+		element.addEventListener(eventType, (context) => {
+			executeEventFunctions({
+				functionArray: eventFn,
+				renderDOM: renderDOM,
+				context: context
+			})
 		}, true)
 	})
 	clearEventOrder()
 }
 
-async function executeEventFunctions(functionArray, renderDOM) {
+function executeEventFunctions({
+	functionArray,
+	renderDOM,
+	context
+}) {
 	functionArray.forEach((el) => {
-		el()
+		el(context)
 	})
 	renderDOM()
 }

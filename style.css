@@ -1,3 +1,15 @@
-.red{
-    background: red;
+ul{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+li{
+    display: flex;
+    padding: .5rem 1rem;
+    gap: 1rem;
+    align-items: center;
+}
+li button{
+    width: fit-content;
+    height: fit-content;
 }

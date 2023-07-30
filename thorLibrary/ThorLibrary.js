@@ -7,7 +7,7 @@ import {setEvents} from "./components/thorEventExecuter.js";
 export function Thor({id}) {
 	let appInitialPoint = document.getElementById(id);
 	let parentElements = null;
-	let componentsID = 0;
+	let componentsID = 1;
 	let eventOrder = []
 	let stateList = []
 
@@ -29,7 +29,7 @@ export function Thor({id}) {
 	}
 
 	function component(args) {
-		return componentDetermination({...args}, componentsID)
+		return componentDetermination({...args}, componentsID++)
 	}
 
 	function parent(parent) {
@@ -51,12 +51,18 @@ export function Thor({id}) {
 			})
 			toAppend.appendChild(parentElement)
 			data?.children()?.forEach((el) => {
-				recursion(el, parentElement)
+				if (typeof el === 'object') {
+					recursion(el, parentElement)
+				}
+				if (typeof el === 'function') {
+					recursion(el(), parentElement)
+				}
 			})
 		}
 
 		//
 		recursion(parentElements, entryElement)
+		//
 		const newDOM = entryElement.cloneNode(true)
 		const mainParent = document.getElementById(id).parentElement
 		const prevDOM = document.getElementById(id)

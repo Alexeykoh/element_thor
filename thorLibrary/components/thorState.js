@@ -6,8 +6,9 @@ export function ThorState({
 	force,
 	storage,
 }, stateList, renderDOM) {
-	setLocalState()
-	const stateID = stateList.length + 1
+	let stateID = storage
+		? storage
+		: Date.now()
 	const startState = {
 		id: stateID,
 		value: value
