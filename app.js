@@ -1,7 +1,8 @@
 import {Thor} from "./thorLibrary/ThorLibrary.js";
+import {todoListComponent} from "./list.js";
 
 // entry point
-const thor = new Thor({id: 'app'})
+export const thor = new Thor({id: 'app'})
 
 const solidList = [
 	{
@@ -15,31 +16,33 @@ const solidList = [
 ]
 
 // states
-const [todoList, setTodoList] = thor.state.set({
+export const [todoList, setTodoList] = thor.state.set({
 	value: solidList,
-	storage: 'todoList'
 })
 
-const [inputValue, setInputValue] = thor.state.set({value: ''})
+export const [inputValue, setInputValue] = thor.state.set({value: ''})
 
 
 function changeValue(newValue) {
 	setInputValue(newValue)
+
 }
 
-function addTask() {
-	let list = [...todoList()]
-	list.push(
-		{
-			id: Date.now(),
-			text: inputValue()
-		}
-	)
-	setTodoList(list)
-	changeValue('')
+export function addTask() {
+	if (inputValue()) {
+		let list = [...todoList()]
+		list.push(
+			{
+				id: Date.now(),
+				text: inputValue()
+			}
+		)
+		setTodoList(list)
+		changeValue('')
+	}
 }
 
-function remTask(id) {
+export function remTask(id) {
 	let list = [...todoList()]
 	list = list.filter((el) => {
 		return el.id !== id
@@ -53,6 +56,7 @@ thor.parent(
 		name: 'TODO',
 		parent: new thor.element({
 			tag: 'div',
+			classList: ['container']
 		}),
 		children: [
 			new thor.component({
@@ -74,10 +78,11 @@ thor.parent(
 						{
 							'change': [
 								(e) => {
+									e.preventDefault()
 									changeValue(e.target.value)
 								}
-							]
-						}
+							],
+						},
 					]
 				}),
 				children: []
@@ -100,54 +105,28 @@ thor.parent(
 				}),
 				children: []
 			}),
+			new thor.component({
+				name: 'state button',
+				parent: new thor.element({
+					tag: 'button',
+					text: 'show state',
+					eventList: [
+						{
+							'click':
+								[
+									() => {
+										console.log(thor.state.getAll())
+									}
+								]
+						}
+					]
+				}),
+				children: []
+			}),
 		]
 	})
 )
 
-// render
-thor.renderDOM()
 
 
-function todoListComponent() {
-	return new thor.component({
-		name: 'ul',
-		parent: new thor.element({
-			tag: 'ul',
-		}),
-		children: todoList().map((el) => {
-			return new thor.component({
-				name: 'li',
-				parent: new thor.element({
-					tag: 'li',
-				}),
-				children: [
-					new thor.component({
-						name: 'p',
-						parent: new thor.element({
-							tag: 'p',
-							text: el.text,
-						}),
-						children: []
-					}),
-					new thor.component({
-						name: 'button',
-						parent: new thor.element({
-							tag: 'button',
-							text: 'delete',
-							eventList: [
-								{
-									click: [
-										() => {
-											remTask(el.id)
-										}
-									]
-								}
-							]
-						}),
-						children: []
-					})
-				]
-			})
-		})
-	})
-}
+
